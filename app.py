@@ -1,71 +1,92 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-from PIL import Image
 
-st.set_page_config(page_title='Survey Results')
-st.header('Survey Results 2021')
-st.subheader('Was the tutorial helpful?')
+# Set Streamlit page configuration
+st.set_page_config(page_title="Dynamic Data Visualizer", page_icon="📊", layout="wide")
 
-### --- LOAD DATAFRAME
-excel_file = 'Survey_Results.xlsx'
-sheet_name = 'DATA'
+# Sidebar content
+st.sidebar.title("Data Genie")
 
-df = pd.read_excel(excel_file,
-                   sheet_name=sheet_name,
-                   usecols='B:D',
-                   header=3)
+# Initialize session state
+if "active_menu" not in st.session_state:
+    st.session_state.active_menu = "Visualize Data"
 
-df_participants = pd.read_excel(excel_file,
-                                sheet_name= sheet_name,
-                                usecols='F:G',
-                                header=3)
-df_participants.dropna(inplace=True)
+# Sidebar menu
+menu_items = {
+    "Visualize Data": "📊",
+    "AskAI": "🤖"
+}
 
-# --- STREAMLIT SELECTION
-department = df['Department'].unique().tolist()
-ages = df['Age'].unique().tolist()
+for item, icon in menu_items.items():
+    if st.sidebar.button(f"{icon} {item}"):
+        st.session_state.active_menu = item
 
-age_selection = st.slider('Age:',
-                        min_value= min(ages),
-                        max_value= max(ages),
-                        value=(min(ages),max(ages)))
+# Rule-based chatbot logic
+def chatbot_response(user_input):
+    if "hello" in user_input.lower():
+        return "Hello! How can I assist you today?"
+    elif "data" in user_input.lower():
+        return "This application lets you upload and analyze data. Try the Visualize Data tab!"
+    elif "help" in user_input.lower():
+        return "Sure! You can ask me about this application's features or general inquiries."
+    else:
+        return "I'm not sure about that. Try asking something else!"
 
-department_selection = st.multiselect('Department:',
-                                    department,
-                                    default=department)
+# Main content logic
+if st.session_state.active_menu == "Visualize Data":
+    st.header("Dynamic Survey Data Visualizer")
+    st.subheader("Upload any CSV file to explore the data dynamically!")
 
-# --- FILTER DATAFRAME BASED ON SELECTION
-mask = (df['Age'].between(*age_selection)) & (df['Department'].isin(department_selection))
-number_of_result = df[mask].shape[0]
-st.markdown(f'*Available Results: {number_of_result}*')
+    uploaded_file = st.file_uploader("Upload your CSV file", type="csv")
 
-# --- GROUP DATAFRAME AFTER SELECTION
-df_grouped = df[mask].groupby(by=['Rating']).count()[['Age']]
-df_grouped = df_grouped.rename(columns={'Age': 'Votes'})
-df_grouped = df_grouped.reset_index()
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        st.success("CSV file uploaded successfully!")
+        st.dataframe(df.head())
 
-# --- PLOT BAR CHART
-bar_chart = px.bar(df_grouped,
-                   x='Rating',
-                   y='Votes',
-                   text='Votes',
-                   color_discrete_sequence = ['#F63366']*len(df_grouped),
-                   template= 'plotly_white')
-st.plotly_chart(bar_chart)
+        if st.button("Edit Data"):
+            edited_df = st.data_editor(df)
+            st.dataframe(edited_df)
 
-# --- DISPLAY IMAGE & DATAFRAME
-col1, col2 = st.columns(2)
-image = Image.open('images/survey.jpg')
-col1.image(image,
-        caption='Designed by slidesgo / Freepik',
-        use_column_width=True)
-col2.dataframe(df[mask])
+        column_options = df.columns.tolist()
+        filter_column = st.selectbox("Filter by column:", options=column_options)
+        if df[filter_column].dtype == 'object':
+            unique_values = df[filter_column].unique().tolist()
+            filter_values = st.multiselect(f"Values to include:", unique_values, default=unique_values)
+            filtered_data = df[df[filter_column].isin(filter_values)]
+        else:
+            min_val, max_val = df[filter_column].min(), df[filter_column].max()
+            range_vals = st.slider(f"Select range:", min_val, max_val, (min_val, max_val))
+            filtered_data = df[df[filter_column].between(range_vals[0], range_vals[1])]
 
-# --- PLOT PIE CHART
-pie_chart = px.pie(df_participants,
-                title='Total No. of Participants',
-                values='Participants',
-                names='Departments')
+        st.dataframe(filtered_data)
 
-st.plotly_chart(pie_chart)
+        x_axis = st.selectbox("X-axis column:", options=column_options)
+        y_axis = st.selectbox("Y-axis column:", options=column_options)
+        chart_type = st.selectbox("Chart type:", ["Bar Chart", "Line Chart", "Scatter Plot", "Pie Chart"])
+
+        if st.button("Generate Visualization"):
+            if chart_type == "Bar Chart":
+                chart = px.bar(filtered_data, x=x_axis, y=y_axis)
+            elif chart_type == "Line Chart":
+                chart = px.line(filtered_data, x=x_axis, y=y_axis)
+            elif chart_type == "Scatter Plot":
+                chart = px.scatter(filtered_data, x=x_axis, y=y_axis)
+            elif chart_type == "Pie Chart":
+                chart = px.pie(filtered_data, names=x_axis, values=y_axis)
+            st.plotly_chart(chart)
+
+elif st.session_state.active_menu == "AskAI":
+    st.title("AskAI")
+    st.write("Interact with a simple AI for insights!")
+
+    # User input for chat
+    user_question = st.text_input("Ask your question:")
+    if st.button("Send"):
+        if user_question.strip() != "":
+            # Get chatbot response
+            response = chatbot_response(user_question)
+            st.write(response)
+        else:
+            st.warning("Please enter a question.")
