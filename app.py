@@ -45,8 +45,6 @@ if "active_menu" not in st.session_state:
     st.session_state.active_menu = "Visualize Data"
 if "generated_charts" not in st.session_state:
     st.session_state.generated_charts = []  # Store generated chart data
-if "selected_chart_index" not in st.session_state:
-    st.session_state.selected_chart_index = None  # Store selected chart index
 
 # Main content logic
 st.header("Dynamic Survey Data Visualizer")
@@ -58,7 +56,6 @@ if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     st.success("CSV file uploaded successfully!")
     st.dataframe(df)
-
 
     column_options = df.columns.tolist()
     x_axis = st.selectbox("X-axis column:", options=column_options)
@@ -84,23 +81,20 @@ if uploaded_file is not None:
         if chart:
             st.plotly_chart(chart)
             pil_image = fig_to_pil(chart)
+            # Save the last generated chart
             st.session_state.generated_charts.append({"chart": chart, "image": pil_image})
 
+# Use the last generated chart for AI analysis
 if st.session_state.generated_charts:
-    selected_chart_index = st.selectbox(
-        "Select a chart for further analysis:",
-        options=list(range(len(st.session_state.generated_charts))),
-        format_func=lambda x: f"Chart {x + 1}"
-    )
-
+    last_chart = st.session_state.generated_charts[-1]  # Get the last chart
     if st.button("Visualizer AI"):
-        selected_chart = st.session_state.generated_charts[selected_chart_index]
-        st.image(selected_chart["image"], caption="Selected Chart", use_container_width=True)
+        st.image(last_chart["image"], caption="Last Generated Chart", use_container_width=True)
 
         # Display a loading spinner while generating the AI response
         with st.spinner("Analyzing the chart... Please wait."):
             time.sleep(2)  # Simulate delay (can be removed)
-            response = get_gemini_response("Analyze this chart", selected_chart["image"])
+            response = get_gemini_response("Analyze this chart", last_chart["image"])
         
         st.subheader("AI Insights:")
         st.write(response)
+        
