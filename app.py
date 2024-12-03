@@ -1,6 +1,38 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+from io import BytesIO
+from PIL import Image
+import os
+from dotenv import load_dotenv
+import google.generativeai as genai
+import time
+
+# Load environment variables from .env
+load_dotenv()
+
+# Configure the Google API key
+api_key = os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=api_key)
+
+# Function to convert a plotly figure to binary data
+def fig_to_pil(fig):
+    buf = BytesIO()
+    fig.write_image(buf, format="png")
+    buf.seek(0)
+    return Image.open(buf)
+
+# Function to get response from Gemini AI API
+def get_gemini_response(input_text, image):
+    model = genai.GenerativeModel("gemini-1.5-flash")  # Use the correct model ID
+    if input_text and image:
+        response = model.generate_content([input_text, image])
+    elif input_text:
+        response = model.generate_content([input_text])
+    else:
+        response = None
+
+    return response.text if response else "No response available."
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="Dynamic Data Visualizer", page_icon="📊", layout="wide")
@@ -11,82 +43,64 @@ st.sidebar.title("Data Genie")
 # Initialize session state
 if "active_menu" not in st.session_state:
     st.session_state.active_menu = "Visualize Data"
-
-# Sidebar menu
-menu_items = {
-    "Visualize Data": "📊",
-    "AskAI": "🤖"
-}
-
-for item, icon in menu_items.items():
-    if st.sidebar.button(f"{icon} {item}"):
-        st.session_state.active_menu = item
-
-# Rule-based chatbot logic
-def chatbot_response(user_input):
-    if "hello" in user_input.lower():
-        return "Hello! How can I assist you today?"
-    elif "data" in user_input.lower():
-        return "This application lets you upload and analyze data. Try the Visualize Data tab!"
-    elif "help" in user_input.lower():
-        return "Sure! You can ask me about this application's features or general inquiries."
-    else:
-        return "I'm not sure about that. Try asking something else!"
+if "generated_charts" not in st.session_state:
+    st.session_state.generated_charts = []  # Store generated chart data
+if "selected_chart_index" not in st.session_state:
+    st.session_state.selected_chart_index = None  # Store selected chart index
 
 # Main content logic
-if st.session_state.active_menu == "Visualize Data":
-    st.header("Dynamic Survey Data Visualizer")
-    st.subheader("Upload any CSV file to explore the data dynamically!")
+st.header("Dynamic Survey Data Visualizer")
+st.subheader("Upload any CSV file to explore the data dynamically!")
 
-    uploaded_file = st.file_uploader("Upload your CSV file", type="csv")
+uploaded_file = st.file_uploader("Upload your CSV file", type="csv")
 
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
-        st.success("CSV file uploaded successfully!")
-        st.dataframe(df.head())
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.success("CSV file uploaded successfully!")
+    st.dataframe(df)
 
-        if st.button("Edit Data"):
-            edited_df = st.data_editor(df)
-            st.dataframe(edited_df)
 
-        column_options = df.columns.tolist()
-        filter_column = st.selectbox("Filter by column:", options=column_options)
-        if df[filter_column].dtype == 'object':
-            unique_values = df[filter_column].unique().tolist()
-            filter_values = st.multiselect(f"Values to include:", unique_values, default=unique_values)
-            filtered_data = df[df[filter_column].isin(filter_values)]
-        else:
-            min_val, max_val = df[filter_column].min(), df[filter_column].max()
-            range_vals = st.slider(f"Select range:", min_val, max_val, (min_val, max_val))
-            filtered_data = df[df[filter_column].between(range_vals[0], range_vals[1])]
+    column_options = df.columns.tolist()
+    x_axis = st.selectbox("X-axis column:", options=column_options)
+    y_axis = st.selectbox("Y-axis column:", options=column_options)
+    chart_type = st.selectbox(
+        "Chart type:", 
+        ["Bar Chart", "Line Chart", "Scatter Plot", "Pie Chart", "Tree Map"]
+    )
 
-        st.dataframe(filtered_data)
+    if st.button("Generate Visualization"):
+        chart = None
+        if chart_type == "Bar Chart":
+            chart = px.bar(df, x=x_axis, y=y_axis)
+        elif chart_type == "Line Chart":
+            chart = px.line(df, x=x_axis, y=y_axis)
+        elif chart_type == "Scatter Plot":
+            chart = px.scatter(df, x=x_axis, y=y_axis)
+        elif chart_type == "Pie Chart":
+            chart = px.pie(df, names=x_axis, values=y_axis)
+        elif chart_type == "Tree Map":
+            chart = px.treemap(df, path=[x_axis], values=y_axis)
 
-        x_axis = st.selectbox("X-axis column:", options=column_options)
-        y_axis = st.selectbox("Y-axis column:", options=column_options)
-        chart_type = st.selectbox("Chart type:", ["Bar Chart", "Line Chart", "Scatter Plot", "Pie Chart"])
-
-        if st.button("Generate Visualization"):
-            if chart_type == "Bar Chart":
-                chart = px.bar(filtered_data, x=x_axis, y=y_axis)
-            elif chart_type == "Line Chart":
-                chart = px.line(filtered_data, x=x_axis, y=y_axis)
-            elif chart_type == "Scatter Plot":
-                chart = px.scatter(filtered_data, x=x_axis, y=y_axis)
-            elif chart_type == "Pie Chart":
-                chart = px.pie(filtered_data, names=x_axis, values=y_axis)
+        if chart:
             st.plotly_chart(chart)
+            pil_image = fig_to_pil(chart)
+            st.session_state.generated_charts.append({"chart": chart, "image": pil_image})
 
-elif st.session_state.active_menu == "AskAI":
-    st.title("AskAI")
-    st.write("Interact with a simple AI for insights!")
+if st.session_state.generated_charts:
+    selected_chart_index = st.selectbox(
+        "Select a chart for further analysis:",
+        options=list(range(len(st.session_state.generated_charts))),
+        format_func=lambda x: f"Chart {x + 1}"
+    )
 
-    # User input for chat
-    user_question = st.text_input("Ask your question:")
-    if st.button("Send"):
-        if user_question.strip() != "":
-            # Get chatbot response
-            response = chatbot_response(user_question)
-            st.write(response)
-        else:
-            st.warning("Please enter a question.")
+    if st.button("Visualizer AI"):
+        selected_chart = st.session_state.generated_charts[selected_chart_index]
+        st.image(selected_chart["image"], caption="Selected Chart", use_container_width=True)
+
+        # Display a loading spinner while generating the AI response
+        with st.spinner("Analyzing the chart... Please wait."):
+            time.sleep(2)  # Simulate delay (can be removed)
+            response = get_gemini_response("Analyze this chart", selected_chart["image"])
+        
+        st.subheader("AI Insights:")
+        st.write(response)
