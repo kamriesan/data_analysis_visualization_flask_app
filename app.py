@@ -35,7 +35,26 @@ def get_gemini_response(input_text, image):
     return response.text if response else "No response available."
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="Dynamic Data Visualizer", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Dynamic Data Visualizer", page_icon="static/icon-192x192.png", layout="wide")
+
+# Inject PWA manifest and service worker registration
+st.markdown(
+    """
+    <link rel="manifest" href="static/manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('static/service-worker.js')
+            .then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.error('Service Worker registration failed:', error);
+            });
+        }
+    </script>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # Sidebar content
 st.sidebar.title("Data Genie")
@@ -97,4 +116,3 @@ if st.session_state.generated_charts:
         
         st.subheader("AI Insights:")
         st.write(response)
-        
