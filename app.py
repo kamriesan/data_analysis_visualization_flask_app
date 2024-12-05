@@ -35,24 +35,10 @@ def get_gemini_response(input_text, image):
     return response.text if response else "No response available."
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="Dynamic Data Visualizer", page_icon="static/icon-192x192.png", layout="wide")
-
-# Inject PWA manifest and service worker registration
-st.markdown(
-    """
-    <link rel="manifest" href="static/manifest.json">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('static/service-worker.js')
-            .then(function(registration) {
-                console.log('Service Worker registered with scope:', registration.scope);
-            }).catch(function(error) {
-                console.error('Service Worker registration failed:', error);
-            });
-        }
-    </script>
-    """,
-    unsafe_allow_html=True,
+st.set_page_config(
+    page_title="DataGenie AI",
+    page_icon="icon.png",  # Path to your new logo
+    layout="wide"
 )
 
 
@@ -66,7 +52,7 @@ if "generated_charts" not in st.session_state:
     st.session_state.generated_charts = []  # Store generated chart data
 
 # Main content logic
-st.header("Dynamic Survey Data Visualizer")
+st.header("DataGenie AI")
 st.subheader("Upload any CSV file to explore the data dynamically!")
 
 uploaded_file = st.file_uploader("Upload your CSV file", type="csv")
@@ -116,3 +102,4 @@ if st.session_state.generated_charts:
         
         st.subheader("AI Insights:")
         st.write(response)
+        
