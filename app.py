@@ -1,6 +1,5 @@
 import numpy as np
 import streamlit as st
-import numpy as np
 import pandas as pd
 import plotly.express as px
 from io import BytesIO
@@ -27,43 +26,51 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
 
-# Display full-screen loading screen with a background image
-placeholder = st.empty()  # Create a placeholder
-bg_image_base64 = get_base64_image("assets/splash-screen-bg.png")  # Path to the splash background image
+# Initialize session state for splash screen
+if "splash_shown" not in st.session_state:
+    st.session_state.splash_shown = False  # Default value: splash screen not yet shown
 
-with placeholder.container():
-    st.markdown(
-        f"""
-        <div style="
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background-image: url(data:image/png;base64,{bg_image_base64}); 
-            background-size: cover; background-position: center; z-index: 9999; 
-            display: flex; justify-content: center; align-items: center; 
-            animation: fadeOut 4s ease-in-out forwards;">
+# Display splash screen only once
+if not st.session_state.splash_shown:
+    placeholder = st.empty()  # Create a placeholder
+    bg_image_base64 = get_base64_image("assets/splash-screen-bg.png")  # Encode splash image
+
+    with placeholder.container():
+        st.markdown(
+            f"""
             <div style="
-                display: flex; 
-                justify-content: center; 
-                align-items: center; 
-                height: 100vh; 
-                width: 100vw; 
-                color:white;
-                ">
-                <h1 style="color: white; font-family: 'Poppins', sans-serif; font-size: 3rem; text-align: center;">
-                    DataGenie AI
-                </h1>
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background-image: url(data:image/png;base64,{bg_image_base64}); 
+                background-size: cover; background-position: center; z-index: 9999; 
+                display: flex; justify-content: center; align-items: center; 
+                animation: fadeOut 4s ease-in-out forwards;">
+                <div style="
+                    display: flex; 
+                    justify-content: center; 
+                    align-items: center; 
+                    height: 100vh; 
+                    width: 100vw; 
+                    color:white;
+                    ">
+                    <h1 style="color: white; font-family: 'Poppins', sans-serif; font-size: 3rem; text-align: center;">
+                        DataGenie AI
+                    </h1>
+                </div>
             </div>
-        </div>
-        <style>
-        @keyframes fadeOut {{
-            0% {{ opacity: 1; }}
-            100% {{ opacity: 0; visibility: hidden; }}
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-    time.sleep(2)  # Show the loading screen for 2 seconds
-placeholder.empty()
+            <style>
+            @keyframes fadeOut {{
+                0% {{ opacity: 1; }}
+                100% {{ opacity: 0; visibility: hidden; }}
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+        time.sleep(2)  # Show the splash screen for 2 seconds
+    placeholder.empty()
+
+    # Mark splash screen as shown
+    st.session_state.splash_shown = True
 
 # Load environment variables
 load_dotenv()
