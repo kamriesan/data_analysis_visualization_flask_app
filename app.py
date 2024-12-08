@@ -193,11 +193,20 @@ if st.session_state.chart_displayed:
     last_chart = st.session_state.generated_charts[-1]  # Get the last chart
     st.plotly_chart(last_chart["chart"], key="unique_chart")  # Display the chart once
 
-    if st.button("Visualizer AI"):
-        st.session_state.chart_displayed = False  # Hide the chart after AI analysis
-        with st.spinner("Analyzing the chart... Please wait.") as spinner:
-            time.sleep(1)  # Simulate delay (can be removed)
-            response = get_gemini_response("Analyze this chart", fig_to_pil(last_chart["chart"]))
+    # Visualizer AI Section
+    st.subheader("Visualizer AI")
+    if st.button("Analyze Chart with AI"):
+        st.session_state.chart_displayed = False  # Prevent multiple analyses for the same chart
+        with st.spinner("Analyzing the chart... Please wait."):
+            # Convert the chart to an image for analysis
+            chart_image = fig_to_pil(last_chart["chart"])
+            # Generate AI insights
+            response = get_gemini_response("Analyze this chart", chart_image)
         
+        # Display the AI-generated insights
         st.subheader("AI Insights:")
-        st.write(response)
+        if response:
+            st.write(response)
+        else:
+            st.write("No insights generated. Please try again.")
+
