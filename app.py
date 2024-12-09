@@ -136,9 +136,10 @@ if "chart_displayed" not in st.session_state:
 logo_path = "assets/icon.png"  # Replace with the path to your logo
 col1, col2 = st.columns([1, 10])  # Adjust the ratio for proper alignment
 with col1:
-    st.image(logo_path, use_container_width=True)  # Display the logo
+    st.image(logo_path)  # Display the logo without the use_container_width argument
 with col2:
     st.title("DataGenie AI")
+
 
 # Subheader with text only
 st.subheader("Upload any CSV file to explore the data dynamically!")
