@@ -123,8 +123,6 @@ def clean_data(df):
 
     return df, cleaning_report
 
-# Sidebar content
-st.sidebar.title("Data Genie")
 
 # Initialize session state variables
 if "active_menu" not in st.session_state:
