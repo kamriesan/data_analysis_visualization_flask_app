@@ -1,44 +1,103 @@
 
-To run, open a terminal and type
-streamlit run app.py
+# DataGenie AI
 
-# Turn Your Excel File Into A Web App With Python
+**DataGenie AI** is an intuitive and powerful data visualization and analytics tool that helps users upload, clean, and explore their data dynamically. This app integrates advanced AI capabilities to provide insightful visualizations and analyses.
 
-In this tutorial, I am going to show you how to convert Excel Files into a Web Application by using the Python Library Streamlit. The beauty of Streamlit is that you can create web applications directly in Python, without needing to know HTML, CSS, or JavaScript. The Web App is fully interactive and will be updated, whenever you make changes in the Excel file.
+---
 
-## Live Demo
-👉 https://surveyresults.pythonandvba.com
+## Features
 
-## Video
+- **Dynamic Data Cleaning**: Automatically cleans data, removes duplicates, and identifies missing values with detailed reports.
+- **Intuitive Visualizations**: Generate charts, including Bar Charts, Line Charts, Scatter Plots, Pie Charts, and Tree Maps, using simple selections.
+- **AI-Powered Analysis**: Leverages generative AI to provide detailed insights into your data visualizations.
+- **Interactive Interface**: Easy-to-use interface designed with Streamlit.
+- **Customizable Themes**: Includes custom CSS for a seamless user experience.
 
-[![YouTube Video](https://img.youtube.com/vi/7zeAIEPJaoQ/0.jpg)](https://youtu.be/7zeAIEPJaoQ)
+---
 
+## Installation
 
+Follow these steps to set up and run the application:
 
-## 🤓 Check Out My Excel Add-ins
-I've developed some handy Excel add-ins that you might find useful:
+### Prerequisites
+- Python 3.8 or later
+- Virtual Environment (optional but recommended)
 
-- 📊 **[Dashboard Add-in](https://pythonandvba.com/grafly)**: Easily create interactive and visually appealing dashboards.
-- 🎨 **[Cartoon Charts Add-In](https://pythonandvba.com/cuteplots)**: Create engaging and fun cartoon-style charts.
-- 🤪 **[Emoji Add-in](https://pythonandvba.com/emojify)**: Add a touch of fun to your spreadsheets with emojis.
-- 🛠️ **[MyToolBelt Add-in](https://pythonandvba.com/mytoolbelt)**: A versatile toolbelt for Excel, featuring:
-  - Creation of Pandas DataFrames and Jupyter Notebooks from Excel ranges
-  - ChatGPT integration for advanced data analysis
-  - And much more!
+### Steps
 
+1. **Clone the Repository**
+   ```bash
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
 
+2. **Set Up a Virtual Environment** (Optional)
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-## 🤝 Connect with Me
-- 📺 **YouTube:** [CodingIsFun](https://youtube.com/c/CodingIsFun)
-- 🌐 **Website:** [PythonAndVBA](https://pythonandvba.com)
-- 💬 **Discord:** [Join the Community](https://pythonandvba.com/discord)
-- 💼 **LinkedIn:** [Sven Bosau](https://www.linkedin.com/in/sven-bosau/)
-- 📸 **Instagram:** [sven_bosau](https://www.instagram.com/sven_bosau/)
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## ☕ Support 
-If you appreciate the project and wish to encourage its continued development, consider [supporting my work](https://pythonandvba.com/coffee-donation).
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://pythonandvba.com/coffee-donation)
+4. **Set Up Environment Variables**
+   - Create a `.env` file in the root directory.
+   - Add your Google API key:
+     ```
+     GOOGLE_API_KEY=<your-google-api-key>
+     ```
 
-## Feedback & Collaboration
-For feedback, suggestions, or potential collaboration opportunities, reach out at contact@pythonandvba.com.
-![Logo](https://www.pythonandvba.com/banner-img)
+5. **Run the Application**
+   ```bash
+   streamlit run app.py
+   ```
+
+6. **Access the App**
+   - Open the provided URL (e.g., `http://localhost:8501`) in your web browser.
+
+---
+
+## Usage
+
+1. Upload a CSV file to begin analyzing your data.
+2. Clean data dynamically using the built-in data cleaning features.
+3. Choose the type of chart and columns for visualization.
+4. Optionally, use the AI feature to analyze and gain insights into your charts.
+
+---
+
+## Folder Structure
+
+```
+├── assets/          # Contains images, icons, and splash screen resources
+├── components/      # Custom reusable components
+├── styles.css       # Custom CSS for styling
+├── app.py           # Main application file
+├── requirements.txt # Required Python packages
+├── setup.sh         # Shell script for environment setup
+└── README.md        # Application documentation
+```
+
+---
+
+## Technologies Used
+
+- **Python**: Core programming language
+- **Streamlit**: Framework for interactive web applications
+- **Plotly**: Library for creating visualizations
+- **Google Generative AI**: Integrated for chart analysis
+- **Pandas**: Data manipulation and cleaning
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+---
+
+## Author
+
+Created by **Mika Gangoso**. For inquiries or support, contact: [your-email@example.com].
