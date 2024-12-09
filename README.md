@@ -92,12 +92,3 @@ Follow these steps to set up and run the application:
 
 ---
 
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
----
-
-## Author
-
-Created by **Mika Gangoso**. For inquiries or support, contact: [your-email@example.com].
