@@ -1,26 +1,26 @@
 
 # DataGenie AI
 
-**DataGenie AI** is an intuitive and powerful data visualization and analytics tool that helps users upload, clean, and explore their data dynamically. This app integrates advanced AI capabilities to provide insightful visualizations and analyses.
+**DataGenie AI** is a powerful and user-friendly data visualization and analytics application designed to enable dynamic data exploration. It integrates cutting-edge AI capabilities to provide insights into your data.
 
 ---
 
 ## Features
 
-- **Dynamic Data Cleaning**: Automatically cleans data, removes duplicates, and identifies missing values with detailed reports.
-- **Intuitive Visualizations**: Generate charts, including Bar Charts, Line Charts, Scatter Plots, Pie Charts, and Tree Maps, using simple selections.
-- **AI-Powered Analysis**: Leverages generative AI to provide detailed insights into your data visualizations.
-- **Interactive Interface**: Easy-to-use interface designed with Streamlit.
-- **Customizable Themes**: Includes custom CSS for a seamless user experience.
+- **Dynamic Data Cleaning**: Automatically cleans data, removes duplicates, and handles missing values with detailed reporting.
+- **Interactive Visualizations**: Create customizable charts including Bar Charts, Line Charts, Scatter Plots, Pie Charts, and Tree Maps.
+- **AI-Powered Insights**: Leverages Google Generative AI to analyze charts and provide meaningful insights.
+- **User-Friendly Interface**: Built with Streamlit for an intuitive and interactive web-based interface.
+- **Customizable Themes**: Includes CSS styling for a polished user experience.
 
 ---
 
 ## Installation
 
-Follow these steps to set up and run the application:
+Follow these steps to set up and run the application locally:
 
 ### Prerequisites
-- Python 3.8 or later
+- Python 3.9 or higher
 - Virtual Environment (optional but recommended)
 
 ### Steps
@@ -42,11 +42,11 @@ Follow these steps to set up and run the application:
    pip install -r requirements.txt
    ```
 
-4. **Set Up Environment Variables**
+4. **Set Environment Variables**
    - Create a `.env` file in the root directory.
    - Add your Google API key:
      ```
-     GOOGLE_API_KEY=<your-google-api-key>
+     GOOGLE_API_KEY=your-api-key
      ```
 
 5. **Run the Application**
@@ -55,40 +55,55 @@ Follow these steps to set up and run the application:
    ```
 
 6. **Access the App**
-   - Open the provided URL (e.g., `http://localhost:8501`) in your web browser.
+   - Open the URL displayed in your terminal (e.g., `http://localhost:8501`) in your browser.
 
 ---
 
 ## Usage
 
-1. Upload a CSV file to begin analyzing your data.
-2. Clean data dynamically using the built-in data cleaning features.
-3. Choose the type of chart and columns for visualization.
-4. Optionally, use the AI feature to analyze and gain insights into your charts.
-
----
-
-## Folder Structure
-
-```
-├── assets/          # Contains images, icons, and splash screen resources
-├── components/      # Custom reusable components
-├── styles.css       # Custom CSS for styling
-├── app.py           # Main application file
-├── requirements.txt # Required Python packages
-├── setup.sh         # Shell script for environment setup
-└── README.md        # Application documentation
-```
+1. Upload a CSV file to start analyzing your data.
+2. Dynamically clean and visualize data with customizable charts.
+3. Use the AI feature to analyze visualizations and gain insights.
 
 ---
 
 ## Technologies Used
 
 - **Python**: Core programming language
-- **Streamlit**: Framework for interactive web applications
-- **Plotly**: Library for creating visualizations
-- **Google Generative AI**: Integrated for chart analysis
+- **Streamlit**: Framework for interactive web apps
+- **Plotly**: Library for creating data visualizations
+- **Google Generative AI**: Provides AI-powered insights
 - **Pandas**: Data manipulation and cleaning
 
+---
+
+## Folder Structure
+
+```
+├── assets/          # Contains images and static files
+├── components/      # Custom reusable components
+├── styles.css       # CSS for styling
+├── app.py           # Main application logic
+├── requirements.txt # Python dependencies
+├── README.md        # Application documentation
+└── .env.example     # Example of environment variables (DO NOT COMMIT SECRETS!)
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+---
+
+## Author
+
+Developed by:
+Mika Gangoso
+John Vincent Racimo
+Ma Corazon Macaraig
+Vince Anthony Carlos
+Korinne Verdillo
 ---
 
