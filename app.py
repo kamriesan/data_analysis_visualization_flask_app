@@ -54,7 +54,7 @@ if not st.session_state.splash_shown:
                     color:white;
                     ">
                     <h1 style="color: white; font-family: 'Poppins', sans-serif; font-size: 3rem; text-align: center;">
-                        DataGenie AI
+                        DataGenie AI App
                     </h1>
                 </div>
             </div>
