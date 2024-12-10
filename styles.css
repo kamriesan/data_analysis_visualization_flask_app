@@ -20,6 +20,11 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, li, button, label, input, t
     font-family: 'Poppins', sans-serif !important;
 }
 
+/* Global text color white */
+.stMarkdown, .css-1d391kg, h1, h2, h3, h4, h5, h6, p, label {
+    color: white !important;
+}
+
 /* Loading screen styling */
 #loading-screen {
     display: flex;
@@ -60,4 +65,18 @@ div.stButton > button:hover {
 div.stButton > button:focus {
     background-color: #8A2BE2 !important;
     color: white !important;
+}
+
+/* Fade-out animation */
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+/* App background */
+.stApp {
+    background-image: url("data:image/png;base64,[BASE64_ENCODED_BG_IMAGE]");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }

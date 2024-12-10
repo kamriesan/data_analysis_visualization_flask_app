@@ -1,4 +1,3 @@
-# works on heroku
 import numpy as np
 import streamlit as st
 import pandas as pd
@@ -21,6 +20,28 @@ st.set_page_config(
 # Load custom CSS from the external file
 with open("styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Function to encode an image as Base64 for fast loading
+def get_base64_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode()
+
+# Add app-bg.png as the background to the entire page
+bg_image_base64 = get_base64_image("assets/app-bg.png")
+st.markdown(
+    f"""
+    <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{bg_image_base64}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # Function to encode an image as Base64 for fast loading
 def get_base64_image(image_path):
@@ -202,11 +223,10 @@ if st.session_state.chart_displayed:
             chart_image = fig_to_pil(last_chart["chart"])
             # Generate AI insights
             response = get_gemini_response("Analyze this chart", chart_image)
-        
-        # Display the AI-generated insights
-        st.subheader("AI Insights:")
-        if response:
-            st.write(response)
-        else:
-            st.write("No insights generated. Please try again.")
 
+            # Display the AI-generated insights
+            st.subheader("AI Insights:")
+            if response:
+                st.write(response)
+            else:
+                st.write("No insights generated. Please try again.")
