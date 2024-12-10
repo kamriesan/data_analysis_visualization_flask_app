@@ -67,3 +67,83 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, li, button, label, input, t
     margin: 0;
 }
 
+/* styles.css */
+
+/* Centered title and subtitle */
+.centered-title {
+    text-align: center;
+    margin-top: -30px;
+}
+.centered-title h1 {
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 36px;
+}
+.centered-title h5 {
+    color: #BBBBBB;
+    margin-top: -10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+}
+
+/* File uploader styling */
+div[data-testid="stFileUploader"] {
+    border-radius: 10px; /* Rounded corners */
+    background-color: white; /* White background */
+    padding: 40px; /* Internal padding */
+    color: #333333; /* Text color */
+    font-size: 16px; /* Font size */
+    width: 85%;
+    margin: auto; /* Center align */
+}
+
+/* Horizontal block styling */
+div[data-testid="stHorizontalBlock"] {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 40px;
+    color: white;
+    width: 85%;
+    margin: auto;
+}
+
+/* Selectbox input styling */
+div[data-testid="stSelectbox"] > div > input {
+    font-size: 16px;
+    padding: 8px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+}
+
+/* Button styling */
+div.stButton > button {
+    background-color: #FF5152; 
+    color: white; /* White text */
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px 20px; /* Padding */
+    font-size: 16px; /* Font size */
+    font-weight: bold; /* Bold text */
+    border: none; /* Remove border */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+div.stButton > button:hover {
+    background-color: #E9292A; /* Darker red on hover */
+    color: white;
+}
+div.stButton > button:disabled {
+    background-color: #D3D3D3; /* Gray background for disabled button */
+    color: #A9A9A9; /* Gray text for disabled button */
+    cursor: not-allowed; /* Show not-allowed cursor */
+    box-shadow: none; /* Remove shadow for disabled button */
+}
+
+/* Spinner styling */
+.stSpinner > div > div {
+    color: #333333 !important; /* Dark gray text color */
+    font-family: 'Poppins', sans-serif; /* Modern font */
+    font-size: 16px; /* Standard font size */
+}

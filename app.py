@@ -10,6 +10,8 @@ import google.generativeai as genai
 import time
 import base64
 from streamlit_extras.stylable_container import stylable_container
+import pdfkit
+from datetime import datetime
 
 
 # Set Streamlit page configuration
@@ -126,6 +128,71 @@ def get_gemini_response(input_text, image):
     except Exception as e:
         return f"Error in generating response: {e}"
 
+def create_pdf(html_content, output_filename):
+    pdfkit.from_string(html_content, output_filename)
+
+def prepare_html(insights):
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Split the insights into lines and process each line
+    insights_lines = insights.split('\n')
+    formatted_insights = ""  # Initialize the content holder
+    
+    for line in insights_lines:
+        # Check if the line starts with a single asterisk for bullet points
+        if line.startswith('*'):
+            line = line[1:].strip()  # Remove the leading asterisk and any whitespace
+            line_corrected = ""
+        else:
+            line_corrected = line  # Process as a regular paragraph
+
+        # Apply bold formatting for words enclosed in **...**
+        in_bold = False
+        i = 0
+        while i < len(line):
+            if line[i:i+2] == '**':  # Detecting bold markers
+                if not in_bold:
+                    line_corrected += '<strong>'
+                    in_bold = True
+                else:
+                    line_corrected += '</strong>'
+                    in_bold = False
+                i += 2  # Skip the next star as part of the bold marker
+            else:
+                line_corrected += line[i]
+                i += 1
+
+        # Wrap bullet points in <li> tags and normal lines in <p> tags
+        if line.startswith('*'):
+            formatted_insights += f"<li>{line_corrected}</li>"
+        else:
+            formatted_insights += f"<p>{line_corrected}</p>"
+
+    # Wrap all bullet points in <ul> if there are any
+    if '<li>' in formatted_insights:
+        formatted_insights = f"<ul>{formatted_insights}</ul>"
+
+    html_content = f"""
+    <html>
+    <head>
+        <title>AI Insights Report</title>
+    </head>
+    <body>
+        <h1>AI Insights Report</h1>
+        <p>Generated on {current_time}</p>
+        <h2>Insights:</h2>
+        <div>{formatted_insights}</div>
+    </body>
+    </html>
+    """
+    return html_content
+
+def generate_and_download_pdf(insights):
+    html_content = prepare_html(insights)
+    filename = "AI_Insights_Report.pdf"
+    create_pdf(html_content, filename)
+    return filename
+
 # Function to clean data with detailed reporting
 def clean_data(df):
     cleaning_report = []
@@ -168,53 +235,6 @@ st.markdown(
             Transform Your Data into Powerful Visualizations & AI Insights!
         </h5>
     </div>
-
-    <style>
-    /* Target the file uploader */
-    div[data-testid="stFileUploader"] {
-        border-radius: 10px; /* Rounded corners */
-        background-color: white; /* Dark grey background */
-        padding: 40px; /* Internal padding */
-        color: #333333; /* Text color */
-        font-size: 16px; /* Font size */
-        width: 85%;
-        margin: auto; /* Center align */
-    }
-
-    /* Target the horizontal block */
-    div[data-testid="stHorizontalBlock"] {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        background-color: white;
-        border-radius: 10px;
-        padding: 40px;
-        color: white;
-        width: 85%;
-        margin: auto;
-    }
-    div[data-testid="stSelectbox"] > div > input {
-        font-size: 16px;
-        padding: 8px;
-        border: 1px solid #cccccc;
-        border-radius: 5px;
-    }
-    div.stButton > button {
-        background-color: #FF5152; /* Violet background */
-        color: white; /* White text */
-        border-radius: 10px; /* Rounded corners */
-        padding: 10px 20px; /* Padding */
-        font-size: 16px; /* Font size */
-        font-weight: bold; /* Bold text */
-        border: none; /* Remove border */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow */
-        cursor: pointer; /* Pointer cursor on hover */
-    }
-    div.stButton > button:hover {
-        background-color: #E9292A; /* Darker violet on hover */
-        color: white;
-    }
-    </style>
     """,
     unsafe_allow_html=True,
 )
@@ -346,6 +366,14 @@ if uploaded_file is not None:
     # Content for col2
     if generate_chart:  # Check if the button is pressed
         with col2:
+            st.markdown(
+                """
+                <h3 style='color: #333333; font-size: 20px; font-weight: bold;'>
+                    📊 Your Chart
+                </h3>
+                """,
+                unsafe_allow_html=True,
+            )
             chart = None
             if chart_type == "Bar Chart":
                 chart = px.bar(df, x=x_axis, y=y_axis)
@@ -358,30 +386,83 @@ if uploaded_file is not None:
             elif chart_type == "Tree Map":
                 chart = px.treemap(df, path=[x_axis], values=y_axis)
 
+            # Ensure the session state is initialized
+            if "chart_displayed" not in st.session_state:
+                st.session_state.chart_displayed = False
+            if "ai_analysis_started" not in st.session_state:
+                st.session_state.ai_analysis_started = False
+
+            # Chart generation logic
             if chart:
-                st.session_state.generated_charts = [{"chart": chart}]  # Update with only the latest chart
-                st.session_state.chart_displayed = True  # Mark the chart as displayed
+                st.plotly_chart(chart, use_container_width=True)
+                st.session_state.generated_charts = [{"chart": chart}]  # Store the latest chart
+                st.session_state.chart_displayed = True
 
-    # Display the latest chart only when not already displayed
-    if st.session_state.chart_displayed:
-        last_chart = st.session_state.generated_charts[-1]  # Get the last chart
-        st.plotly_chart(last_chart["chart"], key="unique_chart")  # Display the chart once
+    col1, col2 = st.columns([5, 1])
+    with col1:
+        st.markdown(
+            """
+            <h3 style='color: #333333; font-size: 20px; font-weight: bold;'>
+    📜 Summon AI Insights
+            </h3>
+            <h6 style='font-family: "Poppins", sans-serif; font-size: 12px; color: #333333; margin-top: -10px;'>
+    Let's consult the magic of Artificial Intelligence to gain insights of your chart!
+            </h6>
+            """,
+            unsafe_allow_html=True,
+        )
+        # Display the latest chart only when not already displayed
+        if st.session_state.chart_displayed:
+            last_chart = st.session_state.generated_charts[-1]  # Get the last chart
+            st.plotly_chart(last_chart["chart"], key="unique_chart")  # Display the chart once
 
-        # Visualizer AI Section
-        st.subheader("Visualizer AI")
-        if st.button("Analyze Chart with AI"):
-            st.session_state.chart_displayed = False  # Prevent multiple analyses for the same chart
-            with st.spinner("Analyzing the chart... Please wait."):
-                # Convert the chart to an image for analysis
-                chart_image = fig_to_pil(last_chart["chart"])
-                # Generate AI insights
-                response = get_gemini_response("Analyze this chart", chart_image)
+            # Visualizer AI Section
+            if st.button("Analyze Chart with AI"):
+                st.session_state.chart_displayed = False  # Prevent multiple analyses for the same chart
+                with st.spinner("Analyzing the chart... Please wait."):
+                    # Convert the chart to an image for analysis
+                    chart_image = fig_to_pil(last_chart["chart"])
+                    # Generate AI insights
+                    # Add custom CSS for the AI Insights text
+                    # Add custom CSS for the AI insights text
+                    st.markdown(
+                        """
+                        <style>
+                        .ai-insights-text {
+                            color: #333333; /* Dark gray text */
+                            font-family: 'Poppins', sans-serif; /* Modern font */
+                            font-size: 16px; /* Standard font size */
+                        }
+                        </style>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
-                # Display the AI-generated insights
-                st.subheader("AI Insights:")
-                if response:
-                    st.write(response)
-                else:
-                    st.write("No insights generated. Please try again.")
+                    # AI-generated insights logic
+                    response = get_gemini_response("Analyze this chart", chart_image)
 
-                
+                    # Display the AI-generated insights with the custom color
+                    if response:
+                        st.markdown(f"<p class='ai-insights-text'>{response}</p>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(
+                            "<p class='ai-insights-text'>No insights generated. Please try again.</p>",
+                            unsafe_allow_html=True,
+                        )
+                    
+                    # Add a button in the Streamlit UI to generate and download the PDF
+                    if st.button("Download AI Insights as PDF"):
+                        if "AI_insights" in st.session_state:
+                            pdf_file = generate_and_download_pdf(st.session_state.AI_insights)
+                            with open(pdf_file, "rb") as file:
+                                st.download_button(
+                                    label="Download PDF",
+                                    data=file,
+                                    file_name=pdf_file,
+                                    mime="application/pdf"
+                                )
+                        else:
+                            st.error("Generate insights before downloading.")
+
+
+
