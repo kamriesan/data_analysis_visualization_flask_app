@@ -299,6 +299,9 @@ if uploaded_file is not None:
             <h3 style='color: #333333;  font-size: 24px; font-weight: bold;'>
                 👀 Data Preview
             </h3>
+            <h6 style='font-family: "Poppins", sans-serif; color: #BBBBBB; margin-top: -10px;'>
+            This is your raw data. What do we do with it?
+            </h6>
             """,
             unsafe_allow_html=True,
         )
@@ -346,7 +349,7 @@ if uploaded_file is not None:
                 unsafe_allow_html=True,
             )
             st.markdown(
-                "<p class='report-title'>Data Cleaning Report:</p>",
+                "<p class='report-title'>Here:</p>",
                 unsafe_allow_html=True,
             )
             for report in cleaning_report:
@@ -356,17 +359,10 @@ if uploaded_file is not None:
                 )
         else:
             st.markdown(
-                "<p class='no-cleaning'>No cleaning necessary; data was already clean.</p>",
+                "<p class='no-cleaning'>No cleaning necessary; data was already clean ✨.</p>",
                 unsafe_allow_html=True,
             )
 
-
-
-
-
-
-
-    
 
     column_options = df.columns.tolist()
 
