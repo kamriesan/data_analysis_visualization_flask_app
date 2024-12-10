@@ -143,7 +143,7 @@ with col2:
 
 
 # Subheader with text only
-st.subheader("Upload any CSV file to explore the data dynamically!")
+st.subheader("Upload a CSV file")
 
 # Main content logic
 uploaded_file = st.file_uploader("Upload your CSV file", type="csv")
