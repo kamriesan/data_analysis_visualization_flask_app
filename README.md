@@ -1,11 +1,12 @@
+https://bit.ly/datagenie-ai
 
-# DataGenie AI
+# 🔮 DataGenie AI
 
 **DataGenie AI** is a powerful and user-friendly data visualization and analytics application designed to enable dynamic data exploration. It integrates cutting-edge AI capabilities to provide insights into your data.
 
 ---
 
-## Features
+## 🪄 Features
 
 - **Dynamic Data Cleaning**: Automatically cleans data, removes duplicates, and handles missing values with detailed reporting.
 - **Interactive Visualizations**: Create customizable charts including Bar Charts, Line Charts, Scatter Plots, Pie Charts, and Tree Maps.
