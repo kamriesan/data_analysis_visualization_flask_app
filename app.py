@@ -107,6 +107,14 @@ def clean_data(df):
     cleaning_report = []
     original_shape = df.shape
 
+        # Remove commas from numeric columns
+    for col in df.columns:
+        if pd.api.types.is_string_dtype(df[col]):
+            try:
+                df[col] = df[col].str.replace(',', '').astype(float)
+            except ValueError:
+                # If conversion fails, keep the column as is
+                pass
     # Remove duplicates
     df_before = df.copy()
     df.drop_duplicates(inplace=True)
