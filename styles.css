@@ -3,26 +3,17 @@
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* Change the sidebar background color */
-section[data-testid="stSidebar"] {
-    background-color: #8A2BE2;  /* Violet color */
-    color: white;  /* Ensure text is readable */
-}
-
-/* Style the sidebar text */
-section[data-testid="stSidebar"] .css-17eq0hr {
-    color: white;  /* Sidebar widget text color */
-}
-
 /* Apply Poppins font globally */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, li, button, label, input, textarea, select {
     font-family: 'Poppins', sans-serif !important;
 }
 
-/* Global text color white */
-.stMarkdown, .css-1d391kg, h1, h2, h3, h4, h5, h6, p, label {
-    color: white !important;
+/* App background */
+.stApp {
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 /* Loading screen styling */
@@ -32,51 +23,47 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, li, button, label, input, t
     align-items: center;
     height: 100vh;
     width: 100vw;
-    background: url('splash-screen-bg.png') no-repeat center center; /* Add background image */
-    background-size: cover; /* Ensure the image covers the entire screen */
+    background-size: cover;
+    background-position: center;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 9999;
-    font-family: 'Poppins', sans-serif;
     color: white;
+    text-align: center;
+    animation: fadeOut 6s ease-in-out forwards;
+}
+
+/* Style for the h1 element */
+#loading-screen h1 {
     font-size: 3rem;
+    font-weight: 600;
+    color: white;  /* Ensures text is white */
+    margin: 0;
 }
 
-/* Button styling */
-div.stButton > button {
-    background-color: #8A2BE2;  /* Violet background */
-    color: white;  /* White text */
-    border: none;  /* Remove border */
-    border-radius: 5px;  /* Rounded corners */
-    padding: 0.5rem 1rem;  /* Add padding */
-    font-size: 16px;  /* Increase font size */
-    font-weight: 500;  /* Slightly bold */
-    cursor: pointer;  /* Pointer cursor on hover */
-}
-
-/* Hover effect for buttons */
-div.stButton > button:hover {
-    background-color: #5A189A;  /* Darker violet background */
-    color: white;  /* Keep text white */
-}
-
-/* Change button text color to white after being clicked */
-div.stButton > button:focus {
-    background-color: #8A2BE2 !important;
-    color: white !important;
-}
-
-/* Fade-out animation */
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; visibility: hidden; }
-}
-
-/* App background */
-.stApp {
-    background-image: url("data:image/png;base64,[BASE64_ENCODED_BG_IMAGE]");
+/* Loading screen styling */
+#loading-screen {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh;
+    width: 100vw;
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    text-align: center; /* Ensure text is centered */
+    animation: fadeOut 6s ease-in-out forwards;
 }
+
+/* Style for the h1 element */
+#loading-screen h1 {
+    font-size: 3rem;
+    font-weight: 600;
+    color: white; /* Ensures text is white */
+    margin: 0;
+}
+
