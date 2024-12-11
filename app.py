@@ -213,14 +213,20 @@ def clean_data(df):
     cleaning_report = []
     original_shape = df.shape
 
-    # Remove commas from numeric columns
+    # Remove commas and convert numeric columns
     for col in df.columns:
         if pd.api.types.is_string_dtype(df[col]):
             try:
                 df[col] = df[col].str.replace(',', '').astype(float)
+                cleaning_report.append(f"Converted column '{col}' to float.")
             except ValueError:
-                # If conversion fails, keep the column as is
-                pass
+                # If conversion fails, check for date conversion
+                try:
+                    df[col] = pd.to_datetime(df[col])
+                    cleaning_report.append(f"Converted column '{col}' to datetime.")
+                except ValueError:
+                    # If conversion to date also fails, keep the column as string
+                    pass
 
     # Remove duplicates
     df_before = df.copy()
