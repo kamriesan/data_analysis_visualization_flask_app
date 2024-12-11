@@ -128,50 +128,17 @@ def get_gemini_response(input_text, image):
     except Exception as e:
         return f"Error in generating response: {e}"
 
-def create_pdf(html_content, output_filename):
-    pdfkit.from_string(html_content, output_filename)
+def create_pdf(html_content):
+    """Generates a PDF file from HTML content and returns a bytes object."""
+    options = {
+        'quiet': ''
+    }
+    pdf = pdfkit.from_string(html_content, False, options=options)
+    return pdf
 
 def prepare_html(insights):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Split the insights into lines and process each line
-    insights_lines = insights.split('\n')
-    formatted_insights = ""  # Initialize the content holder
-    
-    for line in insights_lines:
-        # Check if the line starts with a single asterisk for bullet points
-        if line.startswith('*'):
-            line = line[1:].strip()  # Remove the leading asterisk and any whitespace
-            line_corrected = ""
-        else:
-            line_corrected = line  # Process as a regular paragraph
-
-        # Apply bold formatting for words enclosed in **...**
-        in_bold = False
-        i = 0
-        while i < len(line):
-            if line[i:i+2] == '**':  # Detecting bold markers
-                if not in_bold:
-                    line_corrected += '<strong>'
-                    in_bold = True
-                else:
-                    line_corrected += '</strong>'
-                    in_bold = False
-                i += 2  # Skip the next star as part of the bold marker
-            else:
-                line_corrected += line[i]
-                i += 1
-
-        # Wrap bullet points in <li> tags and normal lines in <p> tags
-        if line.startswith('*'):
-            formatted_insights += f"<li>{line_corrected}</li>"
-        else:
-            formatted_insights += f"<p>{line_corrected}</p>"
-
-    # Wrap all bullet points in <ul> if there are any
-    if '<li>' in formatted_insights:
-        formatted_insights = f"<ul>{formatted_insights}</ul>"
-
+    formatted_insights = format_insights(insights)
     html_content = f"""
     <html>
     <head>
@@ -187,11 +154,25 @@ def prepare_html(insights):
     """
     return html_content
 
+def format_insights(insights):
+    """Formats the insights into HTML content."""
+    insights_lines = insights.split('\n')
+    formatted_insights = ""
+    for line in insights_lines:
+        line_corrected = line.strip()
+        if line_corrected.startswith('*'):
+            line_corrected = f"<li>{line_corrected[1:].strip()}</li>"
+        else:
+            line_corrected = f"<p>{line_corrected}</p>"
+        formatted_insights += line_corrected
+    return f"<ul>{formatted_insights}</ul>" if '<li>' in formatted_insights else formatted_insights
+
 def generate_and_download_pdf(insights):
     html_content = prepare_html(insights)
-    filename = "AI_Insights_Report.pdf"
-    create_pdf(html_content, filename)
-    return filename
+    pdf_bytes = create_pdf(html_content)
+    b64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+    href = f'<a href="data:application/pdf;base64,{b64_pdf}" download="AI_Insights_Report.pdf">Download PDF</a>'
+    return href
 
 # Function to clean data with detailed reporting
 def clean_data(df):
@@ -393,13 +374,23 @@ if uploaded_file is not None:
             elif chart_type == "Pie Chart":
                 chart = px.pie(df, names=x_axis, values=y_axis)
             elif chart_type == "Tree Map":
-                chart = px.treemap(df, path=[x_axis], values=y_axis)
+                if not pd.api.types.is_numeric_dtype(df[y_axis]):
+                    st.error("The Y-axis should consist of a column that is numeric, not text.")
+                    chart = None  # Prevent the chart from being created if the data type is incorrect
+                else:
+                    chart = px.treemap(df, path=[x_axis], values=y_axis)
 
             # Ensure the session state is initialized
             if "chart_displayed" not in st.session_state:
                 st.session_state.chart_displayed = False
             if "ai_analysis_started" not in st.session_state:
                 st.session_state.ai_analysis_started = False
+            
+            # Initialize session state for AI insights
+            if "AI_insights" not in st.session_state:
+                st.session_state.AI_insights = ""
+            if "ai_insights_displayed" not in st.session_state:
+                st.session_state.ai_insights_displayed = False
 
             # Chart generation logic
             if chart:
@@ -425,53 +416,68 @@ if uploaded_file is not None:
             last_chart = st.session_state.generated_charts[-1]  # Get the last chart
             st.plotly_chart(last_chart["chart"], key="unique_chart")  # Display the chart once
 
+            # Render existing AI insights if available
+            if st.session_state.get("ai_insights_displayed", False):
+                st.subheader("AI Insights:")
+                st.markdown(f"<p class='ai-insights-text'>{st.session_state.AI_insights}</p>", unsafe_allow_html=True)
+
             # Visualizer AI Section
             if st.button("Analyze Chart with AI"):
-                st.session_state.chart_displayed = False  # Prevent multiple analyses for the same chart
                 with st.spinner("Analyzing the chart... Please wait."):
                     # Convert the chart to an image for analysis
                     chart_image = fig_to_pil(last_chart["chart"])
-                    # Generate AI insights
-                    # Add custom CSS for the AI Insights text
-                    # Add custom CSS for the AI insights text
-                    st.markdown(
-                        """
-                        <style>
-                        .ai-insights-text {
-                            color: #333333; /* Dark gray text */
-                            font-family: 'Poppins', sans-serif; /* Modern font */
-                            font-size: 16px; /* Standard font size */
-                        }
-                        </style>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
                     # AI-generated insights logic
                     response = get_gemini_response("Analyze this chart", chart_image)
 
-                    # Display the AI-generated insights with the custom color
+                    # Custom CSS to match your design theme
+                    st.markdown(
+                        """
+                        <style>
+                        html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, li, button, label, input, textarea, select {
+                            font-family: 'Poppins', sans-serif !important;
+                            color: #333333 !important; /* Ensures all text is easily visible */
+                        }
+                        </style>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+
+                    # Display the AI-generated insights with updated colors
                     if response:
+                        st.session_state.AI_insights = response  # Store the insights in session state
+                        st.session_state.ai_insights_displayed = True  # Mark insights as displayed
                         st.markdown(f"<p class='ai-insights-text'>{response}</p>", unsafe_allow_html=True)
                     else:
-                        st.markdown(
-                            "<p class='ai-insights-text'>No insights generated. Please try again.</p>",
-                            unsafe_allow_html=True,
-                        )
+                        st.session_state.AI_insights = "No insights generated. Please try again."
+                        st.session_state.ai_insights_displayed = False
+                        st.markdown("<p class='ai-insights-text'>No insights generated. Please try again.</p>", unsafe_allow_html=True)
+
+
+            # Button to trigger PDF generation
+            if st.button("Generate PDF for AI Insight"):
+                if st.session_state.get("AI_insights"):
+                    pdf_link = generate_and_download_pdf(st.session_state.AI_insights)
+                    st.markdown(pdf_link, unsafe_allow_html=True)
                     
-                    # Add a button in the Streamlit UI to generate and download the PDF
-                    if st.button("Download AI Insights as PDF"):
-                        if "AI_insights" in st.session_state:
-                            pdf_file = generate_and_download_pdf(st.session_state.AI_insights)
-                            with open(pdf_file, "rb") as file:
-                                st.download_button(
-                                    label="Download PDF",
-                                    data=file,
-                                    file_name=pdf_file,
-                                    mime="application/pdf"
-                                )
-                        else:
-                            st.error("Generate insights before downloading.")
+                    # Reapply the text color CSS right after generating the PDF
+                    st.markdown(
+                        """
+                        <style>
+                        html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, li, button, label, input, textarea, select {
+                            color: #333333 !important; /* Dark grey text for better visibility */
+                        }
+                        .ai-insights-text {
+                            color: #333333 !important; /* Ensuring AI insights text remains visible */
+                        }
+                        </style>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.error("No insights available to download. Please analyze the chart first.")
+
+
 
 
 
