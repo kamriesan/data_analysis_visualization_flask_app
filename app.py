@@ -12,6 +12,7 @@ import base64
 from streamlit_extras.stylable_container import stylable_container
 import pdfkit
 from datetime import datetime
+import re
 
 
 # Set Streamlit page configuration
@@ -164,17 +165,39 @@ def prepare_html(insights, chart_base64):
 
 
 def format_insights(insights):
-    """Formats the insights into HTML content."""
+    """Formats the insights into HTML content based on specific rules."""
     insights_lines = insights.split('\n')
     formatted_insights = ""
+    list_started = False
+
     for line in insights_lines:
-        line_corrected = line.strip()
-        if line_corrected.startswith('*'):
-            line_corrected = f"<li>{line_corrected[1:].strip()}</li>"
+        line = line.strip()
+
+        # Handle bold formatting surrounded by double asterisks
+        line = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', line)
+
+        # Determine the type of formatting based on the start of the line
+        if line.startswith('* '):
+            if not list_started:
+                formatted_insights += "<ul>"
+                list_started = True
+            line = f"<li>{line[2:]}</li>"  # Remove '* ' and wrap in <li>
         else:
-            line_corrected = f"<p>{line_corrected}</p>"
-        formatted_insights += line_corrected
-    return f"<ul>{formatted_insights}</ul>" if '<li>' in formatted_insights else formatted_insights
+            if list_started:
+                formatted_insights += "</ul>"
+                list_started = False
+            if line.startswith('*'):
+                line = f"<br>{line[1:]}"  # Remove '*' and add a break
+            else:
+                line = f"<p>{line}</p>"
+
+        formatted_insights += line
+
+    if list_started:  # Close the list if it was started
+        formatted_insights += "</ul>"
+
+    return formatted_insights
+
 
 def generate_and_download_pdf(insights, chart):
     chart_base64 = fig_to_base64(chart)
@@ -471,7 +494,7 @@ if uploaded_file is not None:
                     last_chart = st.session_state.generated_charts[-1]['chart']
                     pdf_link = generate_and_download_pdf(st.session_state.AI_insights, last_chart)
                     st.markdown(pdf_link, unsafe_allow_html=True)
-                    
+
                     # Reapply the text color CSS right after generating the PDF
                     st.markdown(
                         """
