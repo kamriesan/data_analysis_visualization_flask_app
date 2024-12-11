@@ -128,6 +128,13 @@ def get_gemini_response(input_text, image):
     except Exception as e:
         return f"Error in generating response: {e}"
 
+def fig_to_base64(fig):
+    buf = BytesIO()
+    fig.write_image(buf, format='png')
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.getvalue()).decode('ascii')
+    return image_base64
+
 def create_pdf(html_content):
     """Generates a PDF file from HTML content and returns a bytes object."""
     options = {
@@ -136,7 +143,7 @@ def create_pdf(html_content):
     pdf = pdfkit.from_string(html_content, False, options=options)
     return pdf
 
-def prepare_html(insights):
+def prepare_html(insights, chart_base64):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     formatted_insights = format_insights(insights)
     html_content = f"""
@@ -149,10 +156,12 @@ def prepare_html(insights):
         <p>Generated on {current_time}</p>
         <h2>Insights:</h2>
         <div>{formatted_insights}</div>
+        <img src="data:image/png;base64,{chart_base64}" alt="Chart" style="width:100%;">
     </body>
     </html>
     """
     return html_content
+
 
 def format_insights(insights):
     """Formats the insights into HTML content."""
@@ -167,12 +176,14 @@ def format_insights(insights):
         formatted_insights += line_corrected
     return f"<ul>{formatted_insights}</ul>" if '<li>' in formatted_insights else formatted_insights
 
-def generate_and_download_pdf(insights):
-    html_content = prepare_html(insights)
+def generate_and_download_pdf(insights, chart):
+    chart_base64 = fig_to_base64(chart)
+    html_content = prepare_html(insights, chart_base64)
     pdf_bytes = create_pdf(html_content)
     b64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
     href = f'<a href="data:application/pdf;base64,{b64_pdf}" download="AI_Insights_Report.pdf">Download PDF</a>'
     return href
+
 
 # Function to clean data with detailed reporting
 def clean_data(df):
@@ -456,8 +467,9 @@ if uploaded_file is not None:
 
             # Button to trigger PDF generation
             if st.button("Generate PDF for AI Insight"):
-                if st.session_state.get("AI_insights"):
-                    pdf_link = generate_and_download_pdf(st.session_state.AI_insights)
+                if st.session_state.get("AI_insights") and st.session_state.get("generated_charts"):
+                    last_chart = st.session_state.generated_charts[-1]['chart']
+                    pdf_link = generate_and_download_pdf(st.session_state.AI_insights, last_chart)
                     st.markdown(pdf_link, unsafe_allow_html=True)
                     
                     # Reapply the text color CSS right after generating the PDF
@@ -475,7 +487,8 @@ if uploaded_file is not None:
                         unsafe_allow_html=True
                     )
                 else:
-                    st.error("No insights available to download. Please analyze the chart first.")
+                    st.error("No insights or charts available to download. Please analyze and generate the chart first.")
+
 
 
 
