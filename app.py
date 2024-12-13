@@ -216,6 +216,10 @@ def clean_data(df):
     # Remove commas and convert numeric columns
     for col in df.columns:
         if pd.api.types.is_string_dtype(df[col]):
+            # Capitalize the first letter of each cell in string columns
+            df[col] = df[col].str.capitalize()
+            cleaning_report.append(f"Capitalized first letter of each cell in column '{col}'.")
+
             try:
                 df[col] = df[col].str.replace(',', '').astype(float)
                 cleaning_report.append(f"Converted column '{col}' to float.")
@@ -243,6 +247,18 @@ def clean_data(df):
                 cleaning_report.append(f"Line {index + 1} in header '{col}' has no value: removed the line.")
             df.dropna(subset=[col], inplace=True)  # Removing rows with NaN in specific column
 
+    # Identify and remove outliers with basic method (e.g., Z-score method)
+    for col in df.select_dtypes(include=[float, int]).columns:
+        mean = df[col].mean()
+        std = df[col].std()
+        cutoff = std * 3
+        lower, upper = mean - cutoff, mean + cutoff
+        outliers = df[(df[col] < lower) | (df[col] > upper)]
+        df = df[(df[col] >= lower) & (df[col] <= upper)]
+        if not outliers.empty:
+            cleaning_report.append(f"Removed {outliers.shape[0]} outliers in column '{col}'.")
+
+    cleaning_report.append(f"Original shape was {original_shape}, cleaned shape is {df.shape}.")
     return df, cleaning_report
 
 
